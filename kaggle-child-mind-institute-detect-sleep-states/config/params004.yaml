@@ -1,0 +1,84 @@
+mlflow_output_path: "/ebs03/child-mind-institute-detect-sleep-states/mlruns"
+feature_dir: "/ebs03/child-mind-institute-detect-sleep-states/output/v5/features/"
+experiment_name: "CNN"
+
+num_epoch: 80
+num_fold: 5
+one_fold: true
+train_batch_size: 32
+valid_batch_size: 32
+test_batch_size: 32
+use_amp: true
+
+optimizer:
+  lr: 1e-5
+  weight_decay: 0
+  grad_norm: 1.0
+
+n_frames: 5760
+n_classes: 3
+feature_names:
+  - "enmo"
+  - "anglez"
+  # - "step"
+  # - "month_sin"
+  # - "month_cos"
+  - "hour_sin"
+  - "hour_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
+        
+criterion:  "BCEWithLogitsLoss" # "CrossEntropyLoss" # "BCEWithLogitsLoss"
+
+dataset:
+  label_offset: 10
+  label_sigma: 10
+
+# augmentation
+aug:
+  mixup_prob: 0.2
+  cutmix_prob: 0.2
+
+# feature extractor
+feature_extractor:
+  name: "CNNSpectrogram"
+  CNNSpectrogram:
+    base_filters: 64
+    kernel_sizes:
+      - 32
+      - 16
+      - 2
+    stride: 2
+    sigmoid: true
+    reinit: true
+
+# decoder 
+decoder:
+  name: "UNet1DDecoder"
+  UNet1DDecoder:
+    bilinear: false
+    se: false
+    res: false
+    scale_factor: 2
+    dropout: 0.2
+
+# model
+model:
+  name: "Spec2DCNN"
+  Spec2DCNN:
+    encoder_name: "resnet34"
+    encoder_weights: "imagenet"
+    mixup_alpha: 0.4
+    cutmix_alpha: 0.4
+
+# post process
+post_process:
+  score_th: 0.005
+  distance: 40
+
+# submit 
+submit:
+  flag: false
+  weight: null

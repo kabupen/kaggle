@@ -1,0 +1,76 @@
+mlflow_output_path: "/ebs03/child-mind-institute-detect-sleep-states/mlruns"
+experiment_name: "CNN"
+
+num_epoch: 50
+num_fold: 5
+one_fold: true
+train_batch_size: 32
+valid_batch_size: 32
+test_batch_size: 32
+use_amp: true
+
+optimizer:
+  lr: 1e-3
+  weight_decay: 0
+
+n_frames: 5760
+n_classes: 3
+feature_names:
+  - "enmo"
+  - "anglez"
+  # - "step"
+  # - "month_sin"
+  # - "month_cos"
+  # - "hour_sin"
+  # - "hour_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
+
+# augmentation
+aug:
+  mixup_prob: 0.0
+  cutmix_prob: 0.0
+
+# feature extractor
+feature_extractor:
+  name: "CNNSpectrogram"
+  CNNSpectrogram:
+    base_filters: 64
+    kernel_sizes:
+      - 32
+      - 16
+      - 2
+    stride: 2
+    sigmoid: true
+    reinit: true
+
+# decoder 
+decoder:
+  name: "UNet1DDecoder"
+  UNet1DDecoder:
+    bilinear: false
+    se: false
+    res: false
+    scale_factor: 2
+    dropout: 0.2
+
+# model
+model:
+  name: "Spec2DCNN"
+  Spec2DCNN:
+    encoder_name: "resnet34"
+    encoder_weights: "imagenet"
+    mixup_alpha: 0.4
+    cutmix_alpha: 0.4
+
+# post process
+post_process:
+  score_th: 0.2
+  distance: 10
+
+# submit 
+submit:
+  flag: true
+  weight: "/kaggle/input/cmi-weight/78762be2f0bb49d68f64426273f80de5_artifacts/v4_rnn_4_0.pth"
